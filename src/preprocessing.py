@@ -2,68 +2,47 @@
 import pandas as pd
 import numpy as np
 
-def mapear_grupo_dia(nombre_dia):
-    """Agrupa los días según el comportamiento de la demanda detectado en el EDA."""
-    if nombre_dia in ['Monday', 'Tuesday', 'Wednesday', 'Thursday']:
-        return 'Lunes-Jueves'
-    elif nombre_dia == 'Friday':
-        return 'Viernes'
-    elif nombre_dia in ['Saturday', 'Sunday']:
-        return 'FinDeSemana'
-    return 'Desconocido'
-
-def mapear_temporada(mes):
-    """Agrupa los meses por estaciones o comportamiento del negocio."""
-    if mes in [12, 1, 2]:
-        return 'Invierno_Pico'
-    elif mes in [6, 7, 8]:
-        return 'Verano_Valle'
-    else:
-        return 'Media_Temporada'
-
 def build_features(df):
     """
-    Transforma el dataset bruto aplicando la ingeniería de características.
-    Elimina columnas que no aportan información lineal al modelo de forma segura.
+    Transforma el dataset bruto aplicando ingeniería de características.
+    Filtra días de cierre y elimina columnas redundantes.
     """
     data = df.copy()
     
-    # Asegurar formato fecha
+    #Excluir días de cierre del entrenamiento
+    if 'es_cierre' in data.columns:
+        data = data[data['es_cierre'] != 1].reset_index(drop=True)
+    
+    #Asegurar formato fecha
     data['fecha_cita'] = pd.to_datetime(data['fecha_cita'])
     
-    # Variable de tendencia: Días transcurridos desde el inicio real del negocio (Mayo 2024)
+    #Variable de tendencia: Días transcurridos desde el inicio (Mayo 2024)
     fecha_min_global = pd.to_datetime("2024-05-09")
     data['dias_desde_inicio'] = (data['fecha_cita'] - fecha_min_global).dt.days
     
-    # Aplicar agrupaciones estratégicas del EDA si existen las columnas base
-    if 'nombre_dia' in data.columns:
-        data['grupo_dia'] = data['nombre_dia'].apply(mapear_grupo_dia)
-    if 'mes' in data.columns:
-        data['temporada'] = data['mes'].apply(mapear_temporada)
-    
-    # Convertir variable tramo a binaria (mañana = 0, tarde = 1)
-    if 'tramo' in data.columns:
-        data['tramo_tarde'] = data['tramo'].map({'mañana': 0, 'tarde': 1})
-    
-    # One-Hot Encoding manual/sencillo para las nuevas categorías creadas
+    #One-Hot Encoding para las nuevas categorías estratégicas
     columnas_encoding = [col for col in ['grupo_dia', 'temporada'] if col in data.columns]
     if columnas_encoding:
-        data = pd.get_dummies(data, columns=columnas_encoding, drop_first=True)
+        data = pd.get_dummies(data, columns=columnas_encoding, drop_first=False)
     
-    # Separar Target (y) de Características (X) de forma segura
+    #Separar Target (y) de Características (X) de forma segura
     if 'n_citas' in data.columns:
         y = data['n_citas']
     else:
         y = None
         
-    # Identificar qué columnas de control/originales existen realmente en este paso para borrarlas
-    columnas_posibles = ['fecha_cita', 'tramo', 'nombre_dia', 'dia_semana', 'mes', 'anio', 'semana_iso', 'n_citas']
-    columnas_a_eliminar = [col for col in columnas_posibles if col in data.columns]
+  #Eliminación de columnas redundantes o repetidas
+    columnas_a_eliminar = [
+        'fecha_cita', 'tramo', 'nombre_dia', 'es_finde', 'es_cierre',
+        'anio', 'semana_iso', 'n_citas'
+    ]
     
-    X = data.drop(columns=columnas_a_eliminar)
+    #Filtramos para borrar solo las que realmente existan en el DataFrame actual
+    columnas_reales_a_eliminar = [col for col in columnas_a_eliminar if col in data.columns]
+    X = data.drop(columns=columnas_reales_a_eliminar)
     
-    # Convertir booleanos resultantes (del encoding) a enteros (0 y 1)
+    #Convertir booleanos resultantes (del encoding) a enteros (0 y 1)
     for col in X.select_dtypes(include=['bool']).columns:
         X[col] = X[col].astype(int)
         
-    return X, y
+    return X, y  
