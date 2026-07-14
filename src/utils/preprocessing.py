@@ -23,7 +23,7 @@ def build_features(df):
     #One-Hot Encoding para las nuevas categorías estratégicas
     columnas_encoding = [col for col in ['grupo_dia', 'temporada'] if col in data.columns]
     if columnas_encoding:
-        data = pd.get_dummies(data, columns=columnas_encoding, drop_first=False)
+        data = pd.get_dummies(data, columns=columnas_encoding)
     
     #Separar Target (y) de Características (X) de forma segura
     if 'n_citas' in data.columns:
