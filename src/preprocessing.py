@@ -2,25 +2,6 @@
 import pandas as pd
 import numpy as np
 
-def mapear_grupo_dia(nombre_dia):
-    """Agrupa los días según el comportamiento de la demanda detectado en el EDA."""
-    if nombre_dia in ['Monday', 'Tuesday', 'Wednesday', 'Thursday']:
-        return 'Lunes-Jueves'
-    elif nombre_dia == 'Friday':
-        return 'Viernes'
-    elif nombre_dia in ['Saturday', 'Sunday']:
-        return 'FinDeSemana'
-    return 'Desconocido'
-
-def mapear_temporada(mes):
-    """Agrupa los meses por estaciones o comportamiento del negocio."""
-    if mes in [12, 1, 2]:
-        return 'Invierno_Pico'
-    elif mes in [6, 7, 8]:
-        return 'Verano_Valle'
-    else:
-        return 'Media_Temporada'
-
 def build_features(df):
     """
     Transforma el dataset bruto aplicando ingeniería de características.
@@ -42,7 +23,7 @@ def build_features(df):
     #One-Hot Encoding para las nuevas categorías estratégicas
     columnas_encoding = [col for col in ['grupo_dia', 'temporada'] if col in data.columns]
     if columnas_encoding:
-        data = pd.get_dummies(data, columns=columnas_encoding, drop_first=True)
+        data = pd.get_dummies(data, columns=columnas_encoding, drop_first=False)
     
     #Separar Target (y) de Características (X) de forma segura
     if 'n_citas' in data.columns:
@@ -53,7 +34,7 @@ def build_features(df):
   #Eliminación de columnas redundantes o repetidas
     columnas_a_eliminar = [
         'fecha_cita', 'tramo', 'nombre_dia', 'es_finde', 'es_cierre',
-        'dia_semana', 'mes', 'anio', 'semana_iso', 'n_citas'
+        'anio', 'semana_iso', 'n_citas'
     ]
     
     #Filtramos para borrar solo las que realmente existan en el DataFrame actual
