@@ -1,9 +1,9 @@
-# src/transform.py
+# src/utils/transform.py
 """
 Funciones para transformar el export bruto de reservas (informe_NOUP.csv) en
 el dataset limpio fecha x tramo con el target n_citas. Se usan para
 reconstruir el histórico cuando llega un export nuevo — no intervienen en la
-predicción de una fecha futura suelta, eso lo cubre `src/feature_engineering.py`.
+predicción de una fecha futura suelta, eso lo cubre `src/utils/feature_engineering.py`.
 
 Cada función corresponde a un paso de `transform.ipynb`, para poder seguir
 viendo el resultado intermedio de cada uno (y su print de verificación) sin
@@ -11,7 +11,6 @@ tener que ejecutar todo el pipeline de una vez.
 """
 import re
 
-import numpy as np
 import pandas as pd
 
 from src.utils.feature_engineering import anadir_variables_calendario, tramo_desde_hora
@@ -106,14 +105,3 @@ def construir_rejilla(confirmadas, fecha_corte):
 
     dataset = anadir_variables_calendario(dataset)
     return dataset.sort_values(['fecha_cita', 'tramo']).reset_index(drop=True)
-
-
-def split_train_test(dataset, test_size=0.2):
-    """Paso 11: split cronológico (nunca aleatorio) train/test."""
-    fechas_unicas = dataset['fecha_cita'].drop_duplicates().sort_values().reset_index(drop=True)
-    n_test_dias = int(np.ceil(len(fechas_unicas) * test_size))
-    fecha_split = fechas_unicas.iloc[-n_test_dias]
-
-    train = dataset[dataset['fecha_cita'] < fecha_split].copy()
-    test = dataset[dataset['fecha_cita'] >= fecha_split].copy()
-    return train, test, fecha_split
