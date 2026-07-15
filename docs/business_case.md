@@ -73,8 +73,9 @@ agregado sin PII (`data/processed/`).
 
 Validado en el estudio de viabilidad y confirmado en el EDA:
 
-- Serie casi continua: 802 días distintos con actividad de un total de 788
-  días naturales en el rango, sin huecos relevantes.
+- Serie casi continua: 760 días con al menos una cita de un total de 783
+  días naturales en el rango (2024-05-09 → 2026-06-30), un 97,1% de cobertura
+  (`data/processed/ocupacion_tramos.csv`), sin huecos relevantes.
 - Identidad y consistencia de las reservas verificadas (deduplicación de pagos
   múltiples por reserva, filtrado de canceladas).
 - Dataset limpio: pocos outliers y explicables como demanda real en fechas
