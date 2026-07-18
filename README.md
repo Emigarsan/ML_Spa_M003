@@ -25,7 +25,7 @@ tramo horario de cada día, para que el negocio pueda:
 - Anticipar la demanda de fechas atípicas (festivos, San Valentín, temporada alta).
 
 El problema, la hipótesis de modelado y su justificación completa están documentados
-en [`docs/business_case.md`](docs/business_case.md).
+en [`src/docs/business_case.md`](src/docs/business_case.md).
 
 ### Dataset utilizado
 
@@ -37,10 +37,10 @@ pago/reserva.
   (nombre, teléfono, email) y **no se sube al repositorio** por protección de datos
   (RGPD) — está excluido explícitamente en `.gitignore` (patrón `*_NOUP*`). Solo
   quien tenga acceso al sistema de reservas del negocio puede regenerarlo.
-- **Datos derivados versionados** (`data/processed/`): agregados **sin ninguna
-  información personal** — solo fecha, tramo horario y variables de calendario. Son
-  el resultado de `notebooks/transform.ipynb`, que descarta cualquier columna
-  identificativa nada más leer el crudo.
+- **Datos derivados versionados** (`src/data_sample/processed/`): agregados **sin
+  ninguna información personal** — solo fecha, tramo horario y variables de
+  calendario. Son el resultado de `src/notebooks/transform.ipynb`, que descarta
+  cualquier columna identificativa nada más leer el crudo.
 - **Cobertura:** 9.081 líneas de pago → 8.106 reservas únicas → 6.190 reservas de
   servicio (se excluyen tarjetas regalo y membresías, que no son citas) → 6.101
   confirmadas (89 canceladas) → 6.040 tras el corte temporal al 30-jun-2026.
@@ -80,28 +80,26 @@ Todo el pipeline está también ensamblado en [`main.ipynb`](main.ipynb) (notebo
 ### Estructura del repositorio
 
 ```
-├── data/processed/       # Datos derivados versionados (agregados, sin PII)
-├── docs/
-│   └── business_case.md  # Problema de negocio, hipótesis y justificación de datos
-├── notebooks/             # Pipeline de desarrollo, un notebook por fase
-│   ├── transform.ipynb
-│   ├── eda.ipynb
-│   ├── feature_engineering.ipynb
-│   ├── feature_preprocessing.ipynb
-│   ├── modeling.ipynb
-│   └── evaluation.ipynb
 ├── src/
+│   ├── data_sample/
+│   │   └── processed/     # Datos derivados versionados (agregados, sin PII)
+│   ├── docs/
+│   │   └── business_case.md  # Problema de negocio, hipótesis y justificación
+│   ├── img/               # Recursos gráficos
 │   ├── models/            # Modelo y scaler entrenados (joblib)
+│   ├── notebooks/         # Pipeline de desarrollo, un notebook por fase
+│   │   ├── transform.ipynb
+│   │   ├── eda.ipynb
+│   │   ├── feature_engineering.ipynb
+│   │   ├── feature_preprocessing.ipynb
+│   │   ├── modeling.ipynb
+│   │   └── evaluation.ipynb
 │   └── utils/             # Funciones reutilizadas por los notebooks
 ├── main.ipynb             # Pipeline completo ensamblado, de principio a fin
+├── Presentación.pdf       # Presentación del proyecto
 ├── requirements.txt
 └── README.md
 ```
-
-> **Nota:** esta estructura difiere todavía de la exigida por el enunciado del curso
-> (`notebooks/` y `data/` deberían vivir bajo `src/`, y falta `src/img/`). La
-> reorganización está pendiente y deliberadamente aplazada hasta cerrar el resto del
-> pipeline, para no romper rutas a mitad de desarrollo — ver [issue #6](https://github.com/Emigarsan/ML_Spa_M003/issues/6).
 
 ### Tecnologías utilizadas
 
@@ -126,8 +124,8 @@ pip install -r requirements.txt
 **Para ejecutar `main.ipynb` de principio a fin** hace falta una copia local propia
 de `informe_NOUP.csv` (el export confidencial, ver más arriba) en la raíz del
 repositorio — sin él, el PRIMER PASO falla. El resto de fases (a partir de
-`data/processed/`) no lo necesitan porque parten de datos ya derivados y
-versionados.
+`src/data_sample/processed/`) no lo necesitan porque parten de datos ya derivados
+y versionados.
 
 **Para usar directamente el modelo ya entrenado** (sin reejecutar todo el pipeline):
 
@@ -202,7 +200,7 @@ intuition or historical averages, without anticipating demand peaks or troughs.
 the business can avoid both over- and under-staffing, and anticipate demand on
 atypical dates (holidays, Valentine's Day, high season).
 
-Full business case and modeling hypothesis: [`docs/business_case.md`](docs/business_case.md).
+Full business case and modeling hypothesis: [`src/docs/business_case.md`](src/docs/business_case.md).
 
 ### Dataset
 
@@ -212,8 +210,8 @@ exports from the spa's booking system.
 - The **raw export** (`informe_NOUP.csv`) contains real customers' personal data
   (name, phone, email) and is **excluded from the repository** (GDPR) via
   `.gitignore` (`*_NOUP*` pattern).
-- **Versioned derived data** (`data/processed/`) are aggregates **with no personal
-  information** — only date, time slot and calendar variables.
+- **Versioned derived data** (`src/data_sample/processed/`) are aggregates **with
+  no personal information** — only date, time slot and calendar variables.
 - Pipeline: 9,081 payment lines → 8,106 unique bookings → 6,190 service bookings →
   6,101 confirmed → 6,040 after the temporal cutoff (2026-06-30).
 - **Final dataset:** 1,566 rows (date × slot), 2024-05-09 to 2026-06-30.
@@ -235,9 +233,8 @@ evaluation against the untouched test set. Fully assembled in
 
 ### Repository structure
 
-See the Spanish section above — same structure. A reorganization to match the
-course's required `src/`-based layout is tracked in
-[issue #6](https://github.com/Emigarsan/ML_Spa_M003/issues/6).
+See the Spanish section above — same structure, following the course's required
+`src/`-based layout.
 
 ### Technologies
 
