@@ -17,6 +17,16 @@ from src.utils.feature_engineering import anadir_variables_calendario, tramo_des
 
 NON_SERVICE_PRODUCTS = ['¡Tarjeta de regalo!', 'Membresías']
 
+# Columnas identificativas del export crudo (RGPD): se eliminan nada más cargar,
+# antes de que ningún dato personal pueda aparecer en outputs de notebooks.
+PII_COLUMNS = [
+    'Contacto',
+    'Teléfono',
+    'Email',
+    'Últim. 4 dígitos tarj. créd.',
+    'Código postal de tarjeta de crédito',
+]
+
 DISP_RE = re.compile(
     r'^(\d{1,2}/\d{1,2}/\d{2,4})(?:\s+a las\s+(\d{1,2}:\d{2})(?:\s*[-–—]\s*(\d{1,2}:\d{2}))?)?'
 )
@@ -38,9 +48,11 @@ def parse_disponibilidad(valor):
 
 
 def cargar_csv_bruto(raw_path):
-    """Paso 1: carga informe_NOUP.csv y descarta la fila de totales del propio export."""
+    """Paso 1: carga informe_NOUP.csv, descarta la fila de totales del propio export
+    y elimina las columnas identificativas (RGPD) antes de cualquier otro paso."""
     df_raw = pd.read_csv(raw_path, skiprows=1, encoding='utf-8-sig')
     df_raw = df_raw[df_raw['ID de reserva'].notna()].copy()
+    df_raw = df_raw.drop(columns=[c for c in PII_COLUMNS if c in df_raw.columns])
     return df_raw
 
 
